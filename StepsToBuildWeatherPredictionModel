@@ -1,0 +1,197 @@
+Collect Weather Data: We will use historical weather data for this model. One common source of weather data is the OpenWeatherMap API. 
+Alternatively, datasets like the Kaggle weather dataset can also be used.
+
+Data Preprocessing: Clean the data, handle missing values, and normalize the data.
+
+Feature Engineering: Convert raw data into features that can be used by the machine learning algorithm.
+
+Model Selection: We'll start with a simple regression model to predict the temperature, but depending on the type of prediction 
+(e.g., temperature, rain, or wind), different models like classification or time-series models may be used.
+
+Model Training: Train the model on the processed data.
+
+Evaluation: Evaluate the model's performance using metrics like Mean Absolute Error (MAE) or Root Mean Squared Error (RMSE).
+
+Example: Weather Prediction (Temperature)
+We will create a simple model that predicts the temperature of a location based on historical weather data.
+
+Prerequisites
+Install the following libraries if they are not installed:
+  pip install pandas numpy scikit-learn matplotlib seaborn requests
+
+Step 1: Collect Data
+For the sake of this example, we will assume that we have a CSV dataset containing weather data. 
+Below is a sample of what this dataset might look like:
+
+Date	Temperature (°C)	Humidity (%)	Wind Speed (m/s)	Pressure (hPa)
+2024-01-01	22.5	80	5.2	1013
+2024-01-02	21.3	75	3.5	1015
+...	...	...	...	...
+
+
+Step 2: Data Preprocessing
+Assuming we have a CSV file with historical weather data, let's load and clean it.
+
+  import pandas as pd
+  import numpy as np
+  from sklearn.model_selection import train_test_split
+  from sklearn.preprocessing import StandardScaler
+  from sklearn.linear_model import LinearRegression
+  from sklearn.metrics import mean_absolute_error, mean_squared_error
+  import matplotlib.pyplot as plt
+  
+  # Load the data
+  df = pd.read_csv('weather_data.csv')
+  
+  # Preview the data
+  print(df.head())
+  
+  # Handle missing values (if any)
+  df = df.dropna()
+  
+  # Convert the Date column to datetime type (if it's not already)
+  df['Date'] = pd.to_datetime(df['Date'])
+  
+  # Feature Engineering: You can extract the month, day, etc., from the 'Date' column if necessary
+  df['Month'] = df['Date'].dt.month
+  df['Day'] = df['Date'].dt.day
+  df['Year'] = df['Date'].dt.year
+  
+  # Feature selection: We will use Temperature as the target variable
+  X = df[['Humidity', 'Wind Speed', 'Pressure', 'Month', 'Day']]  # Features
+  y = df['Temperature']  # Target
+  
+  # Split data into training and testing sets
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+  
+  # Standardize the features (important for many ML models)
+  scaler = StandardScaler()
+  X_train_scaled = scaler.fit_transform(X_train)
+  X_test_scaled = scaler.transform(X_test)
+
+
+Step 3: Model Selection
+We will use a simple Linear Regression model. This can be swapped for more complex models later, such as decision trees, 
+random forests, or neural networks if necessary.
+
+  # Initialize the Linear Regression model
+  model = LinearRegression()
+  
+  # Train the model
+  model.fit(X_train_scaled, y_train)
+
+
+Step 4: Model Evaluation
+After training, we evaluate the model's performance on the test set.
+
+  # Make predictions on the test set
+  y_pred = model.predict(X_test_scaled)
+  
+  # Evaluate the model performance
+  mae = mean_absolute_error(y_test, y_pred)
+  rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+  
+  print(f'Mean Absolute Error: {mae}')
+  print(f'Root Mean Squared Error: {rmse}')
+
+
+Step 5: Visualization
+Let's visualize the actual vs predicted temperatures.
+
+  # Plot actual vs predicted temperatures
+  plt.figure(figsize=(10, 6))
+  plt.plot(y_test.reset_index(drop=True), label='Actual Temperature', color='blue')
+  plt.plot(y_pred, label='Predicted Temperature', color='red', linestyle='--')
+  plt.legend()
+  plt.title('Actual vs Predicted Temperature')
+  plt.xlabel('Test Set Index')
+  plt.ylabel('Temperature (°C)')
+  plt.show()
+
+
+Step 6: Make Predictions
+You can now use the trained model to make predictions for new data.
+
+  # New data for prediction
+  new_data = np.array([[70, 4.5, 1012, 5, 10]])  # Humidity, Wind Speed, Pressure, Month, Day
+  
+  # Scale the new data
+  new_data_scaled = scaler.transform(new_data)
+  
+  # Predict the temperature
+  predicted_temperature = model.predict(new_data_scaled)
+  print(f'Predicted Temperature: {predicted_temperature[0]:.2f} °C')
+
+
+Full Code
+Here's the complete Python code:
+
+  import pandas as pd
+  import numpy as np
+  from sklearn.model_selection import train_test_split
+  from sklearn.preprocessing import StandardScaler
+  from sklearn.linear_model import LinearRegression
+  from sklearn.metrics import mean_absolute_error, mean_squared_error
+  import matplotlib.pyplot as plt
+  
+  # Load the data
+  df = pd.read_csv('weather_data.csv')
+  
+  # Preview the data
+  print(df.head())
+  
+  # Handle missing values
+  df = df.dropna()
+  
+  # Convert Date column to datetime
+  df['Date'] = pd.to_datetime(df['Date'])
+  
+  # Feature Engineering: Extract features from the Date column
+  df['Month'] = df['Date'].dt.month
+  df['Day'] = df['Date'].dt.day
+  df['Year'] = df['Date'].dt.year
+  
+  # Features and Target
+  X = df[['Humidity', 'Wind Speed', 'Pressure', 'Month', 'Day']]  # Features
+  y = df['Temperature']  # Target
+  
+  # Split the data into train and test sets
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+  
+  # Standardize the features
+  scaler = StandardScaler()
+  X_train_scaled = scaler.fit_transform(X_train)
+  X_test_scaled = scaler.transform(X_test)
+  
+  # Initialize the model
+  model = LinearRegression()
+  
+  # Train the model
+  model.fit(X_train_scaled, y_train)
+  
+  # Make predictions on the test set
+  y_pred = model.predict(X_test_scaled)
+  
+  # Evaluate the model
+  mae = mean_absolute_error(y_test, y_pred)
+  rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+  
+  print(f'Mean Absolute Error: {mae}')
+  print(f'Root Mean Squared Error: {rmse}')
+  
+  # Visualize Actual vs Predicted temperatures
+  plt.figure(figsize=(10, 6))
+  plt.plot(y_test.reset_index(drop=True), label='Actual Temperature', color='blue')
+  plt.plot(y_pred, label='Predicted Temperature', color='red', linestyle='--')
+  plt.legend()
+  plt.title('Actual vs Predicted Temperature')
+  plt.xlabel('Test Set Index')
+  plt.ylabel('Temperature (°C)')
+  plt.show()
+  
+  # Example prediction with new data
+  new_data = np.array([[70, 4.5, 1012, 5, 10]])  # Example data: [Humidity, Wind Speed, Pressure, Month, Day]
+  new_data_scaled = scaler.transform(new_data)
+  predicted_temperature = model.predict(new_data_scaled)
+  print(f'Predicted Temperature: {predicted_temperature[0]:.2f} °C')
+
